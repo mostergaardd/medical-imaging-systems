@@ -22,7 +22,7 @@ err_std = 0.5;
 
 ts = (2*vz*cos(vessel_angle) / c) * T_prf;
 n_ts = round(ts * fs);
-n_signals = 500;
+n_signals = 100;
 
 vessel_length = vessel_diameter / sin(vessel_angle); %m
 delta_depth = dx / tan(pi - vessel_angle);
@@ -69,87 +69,53 @@ colormap(hot);
 
 %%
 
-factor = - (c * f_prf) / (4 * pi * f0);
+winsize = round(1/f0 * fs);
+v_est = acorr_estimate(single_line, 1, c, f_prf, f0, vessel_angle);
 
-complex_sig = hilbert(single_line);
-[r, lags] = xcorr(complex_sig(50,:));
-idx = find(lags==1);
+mean(v_est)
+std(v_est)
 
-v_ = factor * atan(imag(r(idx)) / real(r(idx)));
-
-%%
-received_matrix = [];
-scatter(1) = 50; 
-scatter(end) = 50;
-for j=(1:lines)
-    phantom = vertcat(zeros(depth, 1), scatter, ...
-        zeros(total_depth - depth - N_scatter, 1));
-    received_signal = conv(pulse, phantom);
-    received_signal = received_signal + err_std * randn(size(received_signal));
-    received_matrix = [received_matrix, received_signal];
-
-    depth = depth + delta_depth;
-end
-
-received_matrix_h = abs(hilbert(received_matrix));
-received_matrix_drc = drc(unit_normalize(received_matrix_h), 60);
-
-[rf_samples, n_lines] = size(received_matrix_drc);
-
-width_x = (0:n_lines) .* dx;
-width_x = (0:dx:n_lines);
-width_x = width_x - width_x(end)/2;
-
-t = (0:rf_samples-1) ./ fs;
-depth = (t .* 1500) ./ 2;
 figure;
-imagesc(width_x, depth*1e2, int32(received_matrix_drc * 127));
-colormap(gray(128));
-ylabel('Depth [cm]');
-xlabel('Axial displacement [m]')
-%set(gca, 'view', [0, -90]);
+plot(v_est(200:end-200));
 
 %%
 
-
-
-%%
-
-f_prf = 5e3; %Hz
-vz = 0.15; %m/s
-T_prf = 1 / f_prf; %s
-c = 1500; %m/s
-
-ts = (2*vz*cos(vessel_angle) / c) * T_prf;
-n_ts = round(ts * fs);
-
-n_signals = 100;
-
-received_over_time = zeros(n_signals,rf_samples);
-
-received_over_time(1, :) = received_signal;
-cnt = 1;
-
-for i=2:n_signals
-    index = cnt * n_ts;
+function v = acorr_estimate(rf, winsize, c, f_prf, f0, rad_angle)
+    rf_iq = hilbert(rf);
+    N_i = size(rf_iq, 1);
+    N_rf = size(rf_iq, 2);
     
-    signal = received_signal(1:end-index)';
+    factor = - (c * f_prf) / (4 * pi * f0);
     
-    pad = rf_samples - length(signal);
+    v = zeros(1, N_rf - winsize);
     
-    received_over_time(i, :) = [zeros(1, pad), signal];
-    
-    cnt = cnt + 1;
-end
-
-%%
-
-function v = acorr_estimate(rf_0, rf_1, c, f_prf, f0)
-    rf_0_c = hilbert(rf_0);
-    rf_1_c = hilbert(rf_1);
-    
-    
-
+    for n = 1:N_rf - winsize
+        r = rf_iq(:, n:n+winsize-1);
+        
+        vs = 0;
+        for m = 1:winsize
+            rm = r(:, m);
+            
+            y = imag(rm);
+            x = real(rm);
+            
+            Ri = 0;
+            Rr = 0;
+            for i = (1:length(rm)-1)
+                Ri = Ri + (y(i+1)*x(i) - x(i+1)*y(i));
+                Rr = Rr + (x(i+1)*x(i) + y(i+1)*y(i));
+            end
+            Ri = Ri / length(rm);
+            Rr = Rr / length(rm);
+            
+            vs_m = factor * atan2(Ri, Rr);
+            vs_m = vs_m / cos(rad_angle);
+            
+            vs = vs + vs_m; 
+        end
+        
+        v(n) = vs / winsize; 
+    end
 end
 
 function y = unit_normalize(x)
