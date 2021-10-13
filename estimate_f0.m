@@ -2,6 +2,9 @@ function [f0_est, PULSE] = estimate_f0(pulse, n_fft, f, do_plot)
 %ESTIMATE_F0 Summary of this function goes here
 %   Detailed explanation goes here
 
+pulse = pulse(:);
+f = f(:);
+
 % Calculate spectrum
 PULSE = fftshift(fft(pulse, n_fft));
 
@@ -30,8 +33,13 @@ end
 segment = abs(PULSE(bw_idx:fw_idx+1));
 f_segment = f(bw_idx:fw_idx+1);
 
-segment_sum = cumsum(segment);
-f0_est = f_segment(segment_sum == prctile(segment_sum, 50));
+% Method Jørgen
+f0_est = sum(segment .* f_segment) / sum(segment);
+
+% Method MØ
+%segment_sum = cumsum(segment);
+%[~, I] = min(abs(segment_sum - prctile(segment_sum, 50)));
+%f0_est = f_segment(I);
 
 if do_plot
    figure; 

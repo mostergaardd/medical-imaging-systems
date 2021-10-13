@@ -1,5 +1,5 @@
 function [v,depth] = autocorr_estimator...
-    (rf, winsize, c, f_prf, f0, rad_angle, fs)
+    (rf, winsize, c, f_prf, f0, rad_angle, fs, m_h, apply_echo_c, apply_mf)
 %AUTOCORR_ESTIMATOR Applies autocorrelation flow estimation
 %   rf: RF signal to calculate CFM on. Real signal. Should be [emissions,
 %   rf_signals]. 
@@ -11,8 +11,21 @@ function [v,depth] = autocorr_estimator...
 %   rad_angle: vessel angle in radians  [rads]
 %   fs: sample frequency                [hz]
 
+% Apply matched filter
+if apply_mf
+    for i=1:size(rf,1)
+        rf(i,:) = conv(rf(i,:), m_h(:), 'same');
+    end
+end
+
+% Apply echo cancelling
+rf_ec = rf;
+if apply_echo_c
+    rf_ec = rf - mean(rf, 1);
+end
+
 % Obtain the IQ signal
-rf_iq = hilbert(rf);
+rf_iq = hilbert(rf_ec);
 N_rf = size(rf_iq, 2);
 
 factor = - (c * f_prf) / (4 * pi * f0);
