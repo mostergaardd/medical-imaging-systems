@@ -57,6 +57,7 @@ end
 
 % Display 2x the largest detected velocity
 v_act_max = 2 * min(min(all_vs_interp));
+% Note: We assume only negative flow based on the measured velocities.
 
 % Initialize an index-image for flow
 x = zeros(size(bmode_image));
