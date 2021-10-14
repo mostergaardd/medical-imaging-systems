@@ -40,11 +40,18 @@ end
 
 % Surround the vessel with stationary signal and add interface scatter
 data(:, [1:N_scatter, 2*N_scatter+1:end]) = [stationary_part, stationary_part];
-data(:, [N_scatter, 2*N_scatter]) = ones(n_emissions, 2) .* vessel_amp;
+%data(:, [N_scatter, 2*N_scatter]) = ones(n_emissions, 2) .* vessel_amp;
+data_boundary = zeros(size(data));
+data_boundary(:, [N_scatter-5, 2*N_scatter+5]) = ones(n_emissions, 2) .* vessel_amp;
 
 % Convolute phantom with US pulse
 for i=1:n_emissions
     data(i,:) = conv(data(i,:), pulse, 'same');
+    data_boundary(i,:) = conv(data_boundary(i,:), pulse, 'same');
+end
+
+if add_st_sig
+    data = data + data_boundary;
 end
 
 % Maybe add random noise to the measurement

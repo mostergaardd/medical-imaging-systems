@@ -14,7 +14,7 @@ x_min   = -9.75e-3;     % Data start left [m]
 x_max   = 9.75e-3;      % Data start right [m]
 
 % Variables
-drc_db   = 60;          % Dynamic range [dB]
+drc_db   = 55;          % Dynamic range [dB]
 scales   = 128;         % Number of gray levels in b-mode 
 flow_scales = 2048;     % Number of color levels in cfm
 apply_mf = false;       % Don't apply matched filter
