@@ -82,7 +82,6 @@ plot(v_est(200:end-200));
 
 function v = acorr_estimate(rf, winsize, c, f_prf, f0, rad_angle)
     rf_iq = hilbert(rf);
-    N_i = size(rf_iq, 1);
     N_rf = size(rf_iq, 2);
     
     factor = - (c * f_prf) / (4 * pi * f0);

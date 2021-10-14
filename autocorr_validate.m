@@ -1,8 +1,4 @@
 clear; close all; clc;
-%%
-all_biases = {};
-all_stdevs = {};
-%%
 
 global f0 M fs n_fft vessel_angle vessel_diameter f_prf
 global T_prf vz c seed winsize_
@@ -18,7 +14,6 @@ f_prf = 5e3;                % pulse repetition frequency [hz]
 T_prf = 1 / f_prf;          % pulse repetition time [s]
 vz = 0.15;                  % simulated velocity [m/s]
 c = 1500;                   % speed of sound [m/s]
-err_std = 0.5;              % standard dev of noise
 seed = 0;                   % random seed
 
 %% Evaluate windowsize on-off
@@ -129,10 +124,10 @@ display_bias_plot(all_biases, all_stdevs, {'Impact of echo cancelling', 'Winsize
 
 %% SNR estimate
 
-add_noise             = 0;
-add_stationary_signal = 0;
-apply_ec              = 0;
-overwrite_winsize     = 0;
+add_noise             = false;
+add_stationary_signal = false;
+apply_ec              = false;
+overwrite_winsize     = false;
 n_emissions           = 8;
 
 load('pulse.mat');
@@ -182,7 +177,7 @@ for i = 1:size(all_biases,2)
     grid on; hold on;
 end
 set(gca, 'XTickLabel', [])
-title('Importance of matched filter in presence of noise');
+title({'Importance of matched filter in presence of noise', 'N_c: 8'});
 legend({'No matched filter', 'With matched filter'});
 
 ax2=subplot(2,1,2);
