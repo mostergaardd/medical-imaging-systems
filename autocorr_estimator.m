@@ -4,12 +4,16 @@ function [v,depth] = autocorr_estimator...
 %   rf: RF signal to calculate CFM on. Real signal. Should be [emissions,
 %   rf_signals]. 
 %   winsize: Optional averaging over samples in depth. A good choice is one
-%       pulse width                     [samples]
-%   c: Speed of sound                   [m/s]
-%   f_prf: Pulse repetition frequency   [hz]
-%   f0: center frequency of us pulse    [hz]
-%   rad_angle: vessel angle in radians  [rads]
-%   fs: sample frequency                [hz]
+%       pulse width                      [samples]
+%   c: Speed of sound                    [m/s]
+%   f_prf: Pulse repetition frequency    [hz]
+%   f0: center frequency of us pulse     [hz]
+%   rad_angle: vessel angle in radians   [rads]
+%   fs: sample frequency                 [hz]
+%   m_h: matched filter                 
+%   appply_echo_c: flag for applying ec  [bool]
+%   apply_mf: 
+%       flag for applying matched filter [bool]
 
 % Apply matched filter
 if apply_mf

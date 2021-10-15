@@ -1,6 +1,11 @@
 function [output_lines] = process_rf(lines, dynamic_range, scale)
-%PROCESS_RF Summary of this function goes here
-%   Detailed explanation goes here
+%PROCESS_RF Process RF data for B-mode imaging
+%   Apply envelope detection, dynamic range compression and grayscale
+%   mapping on the given RF data
+%   Arguments
+%   lines: RF data
+%   dynamic_range: dynamic rance in decibels
+%   scale: number of grayscales to map to
 
 line_env = abs(hilbert(lines));
 

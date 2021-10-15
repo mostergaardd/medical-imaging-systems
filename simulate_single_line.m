@@ -1,8 +1,25 @@
 function [data, N_scatter] = simulate_single_line(...
     vessel_angle, vessel_diameter, f_prf, fs, vz, c, ...
     n_emissions, pulse, seed, err_std, add_noise, add_st_sig)
-%SIMULATE_SINGLE_LINE Summary of this function goes here
-%   Detailed explanation goes here
+%SIMULATE_SINGLE_LINE Simulate data for CFM estimator
+%   Generate data for the CFM estimator. The output of the function is
+%   n_emissions lines taken at the same axial position. The vessel is
+%   placed halfway through the phantom, with equal spacing on either side.
+%   Arguments
+%   vessel_angle: angle between flow and beam   [rads]
+%   vessel_diameter: diameter of vessel         [m]
+%   f_prf: pulse repetition frequency           [hz]
+%   fs: system sample rate                      [hz]
+%   vz: target velocity                         [m/s]
+%   c: speed of sound                           [m/s]
+%   n_emissions: number of emissions in data    [samples]
+%   pulse: ultrasound pulse to use              []
+%   seed: seed for random number generator      []
+%   err_std: not used 
+%   add_noise: flag for adding noise to signal  [bool]
+%   add_st_sig: flag for adding stationary sig  [bool]
+
+
 rng(seed);
 T_prf = 1 / f_prf;
 

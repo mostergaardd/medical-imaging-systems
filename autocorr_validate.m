@@ -1,5 +1,6 @@
 clear; close all; clc;
 
+% Mark these parameters as global for function to use
 global f0 M fs n_fft vessel_angle vessel_diameter f_prf
 global T_prf vz c seed winsize_
 
@@ -18,9 +19,7 @@ seed = 0;                   % random seed
 
 %% Evaluate windowsize on-off
 
-all_biases = {};
-all_stdevs = {};
-
+% Hyperparameters
 apply_mf                = false;
 apply_ec                = false;
 add_noise               = false;
@@ -31,6 +30,8 @@ do_estimate_f0          = true;
 winsize_                = 1;
 n_emissions = 20;
 
+% Collect results
+all_biases = {}; all_stdevs = {};
 biases = []; stdevs = [];
 
 for overwrite_winsize=[1, 0]
@@ -41,13 +42,12 @@ for overwrite_winsize=[1, 0]
     all_biases{end+1} = biases(:);
 end
 
+% Plotting
 display_bias_plot(all_biases, all_stdevs, {'Impact of window size'}, {'Winsize=1', 'Winsize=T_0'}, 'estimate_winsize.png');
 
 %% Evaluate importance of modifying the pulse
 
-all_biases = {};
-all_stdevs = {};
-
+% Flags / hyperparameters
 apply_mf                = false;
 apply_ec                = false;
 add_noise               = false;
@@ -56,6 +56,10 @@ doplot                  = false;
 overwrite_winsize       = false;
 do_estimate_f0          = true;
 n_emissions = 20;
+
+% Housekeeping
+all_biases = {}; all_stdevs = {};
+biases = []; stdevs = [];
 
 for modify_pulse=[false, true]
     
@@ -67,12 +71,9 @@ end
 
 display_bias_plot(all_biases, all_stdevs, {'Impact of modifying pulse', 'Winsize: T_0'}, {'Original', 'Modified'}, 'estimate_pulse_modify.png');
 
-
 %% Evaluate importance of estimating f0
 
-all_biases = {};
-all_stdevs = {};
-
+% Flags
 apply_mf                = false;
 apply_ec                = false;
 add_noise               = false;
@@ -81,6 +82,9 @@ modify_pulse            = false;
 doplot                  = false;
 overwrite_winsize       = false;
 n_emissions = 20;
+
+all_biases = {}; all_stdevs = {};
+biases = []; stdevs = [];
 
 for do_estimate_f0=[false, true]
     
@@ -97,6 +101,7 @@ display_bias_plot(all_biases, all_stdevs, {'Impact of using estimate of f_0', 'W
 all_biases = {};
 all_stdevs = {};
 
+% Flags
 apply_mf                = false;
 apply_ec                = false;
 add_noise               = false;
@@ -107,6 +112,7 @@ overwrite_winsize       = false;
 do_estimate_f0          = false;
 n_emissions = 20;
 
+% Test without echo cancelling
 [biases, stdevs] = run_experiment(modify_pulse, do_estimate_f0, err_std, add_noise, add_stationary_signal, overwrite_winsize, apply_mf, apply_ec, doplot);
     
 all_stdevs{end+1} = stdevs(:);
@@ -120,23 +126,28 @@ apply_ec                = true;
 all_stdevs{end+1} = stdevs(:);
 all_biases{end+1} = biases(:);
 
+% Plotting
 display_bias_plot(all_biases, all_stdevs, {'Impact of echo cancelling', 'Winsize: T_0'}, {'No EC', 'With EC'}, 'estimate_EC.png');
 
 %% SNR estimate
 
+% Flags
 add_noise             = false;
 add_stationary_signal = false;
 apply_ec              = false;
 overwrite_winsize     = false;
 n_emissions           = 8;
 
+% Do the specific things from `run_experiment` we need here
 load('pulse.mat');
 matched_h = matched_filter(pulse, 0);
 
+% Generate a baseline noise-free signal
 [single_line, vessel_depth] = simulate_single_line(... 
             vessel_angle, vessel_diameter, f_prf, fs, vz, c,...
             n_emissions, pulse, seed, err_std, add_noise, add_stationary_signal);
-        
+
+% Use T0 windowsize       
 winsize = abs(round(1/f0 * fs));
 signal_power = max(max(single_line));
 
@@ -148,8 +159,9 @@ for apply_mf = [0 1]
     biases = []; stdevs = [];
     
     for snr = [-10 -5 0 5 10 15 20]
+        % Estimate needed noise power
         p_noise = 10^(signal_power/20) / 10^(snr/20);
-
+        
         noise = p_noise * randn(size(single_line));
         data = single_line + noise;
 
@@ -167,6 +179,7 @@ for apply_mf = [0 1]
     
 end
 
+% Plotting
 SNRS = [-10 -5 0 5 10 15 20];
 
 figure;

@@ -1,6 +1,9 @@
 function [h] = matched_filter(pulse, doplot)
-%MATCHED_FILTER Summary of this function goes here
-%   Detailed explanation goes here
+%MATCHED_FILTER Return the time-reversed matched filter of a signal
+%   Arguments
+%   pulse: signal template
+%   doplot: flag for plotting
+
 pulse = pulse(:);
 h = flip(pulse);
 

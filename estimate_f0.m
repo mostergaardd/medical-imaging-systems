@@ -1,6 +1,12 @@
 function [f0_est, PULSE] = estimate_f0(pulse, n_fft, f, do_plot)
-%ESTIMATE_F0 Summary of this function goes here
-%   Detailed explanation goes here
+%ESTIMATE_F0 Estimate the center frequency of a pulse
+%   Estimates f0 from an ultrasound pulse by taking the spectral centroid
+%   of the highest peak
+%   Arguments
+%   pulse: an ultrasound pulse
+%   n_fft: number of samples to use in fft
+%   f: a frequency vector
+%   doplot: flag for plotting
 
 pulse = pulse(:);
 f = f(:);
@@ -33,13 +39,8 @@ end
 segment = abs(PULSE(bw_idx:fw_idx+1));
 f_segment = f(bw_idx:fw_idx+1);
 
-% Method Jørgen
+% Calculate the spectral centroid
 f0_est = sum(segment .* f_segment) / sum(segment);
-
-% Method MØ
-%segment_sum = cumsum(segment);
-%[~, I] = min(abs(segment_sum - prctile(segment_sum, 50)));
-%f0_est = f_segment(I);
 
 if do_plot
    figure; 
